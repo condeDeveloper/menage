@@ -20,10 +20,13 @@ puro, sem dependência nenhuma.
    São 2.432.902.008.176.640.000 permutações contra 20.971.520 estados. O truque
    é só um: duas permutações que já sentaram o mesmo conjunto de maridos valem a
    mesma coisa daí para a frente.
-3. **Somar os termos de Touchard em ponto flutuante começa a errar em 22
-   casais.** Até 21 o `double` devolve o valor exato; de 22 em diante não. O
-   erro é pequeno — 2,1 × 10⁻¹⁵ com trinta casais — mas o valor exato se perde,
-   e em aritmetica inteira ele não custa nada.
+3. **O ponto em que o ponto flutuante quebra depende da versão do Python.** O
+   limite que não depende de nada é `2⁵³`: enquanto todo termo cabe num
+   `double` sem perder dígito — o que vale até **dezessete casais** — a soma
+   fecha exata. Daí em diante a exatidão vira sorte: no Python 3.13 o primeiro
+   erro aparece em 22 casais, e no **3.11 já em 19**. O erro é minúsculo,
+   2,1 × 10⁻¹⁵ com trinta casais, mas o valor exato se perde — e em aritmética
+   inteira ele não custa nada.
 4. **A fatia de arranjos que sobram converge para `e⁻²` por baixo, e devagar.**
    Com cinco casais é 0,1083; com sessenta ainda é 0,1331, contra 0,1353. Só
    três casais ficam **acima** do alvo, com 0,1667.
@@ -79,11 +82,15 @@ não dar conta:
 | casais | inteiro | double | erro relativo |
 |---|---|---|---|
 | 15 | 164.806.435.783 | exato | 0 |
-| 20 | 312.400.218.671.253.762 | exato | 0 |
+| 17 | 45.226.435.601.207 | exato | 0 |
 | 30 | 34.682.040.826.614.983.472.734.095.531.712 | 3,468204 × 10³¹ | 2,078 × 10⁻¹⁵ |
 | 60 | 1,107199898… × 10⁸¹ | 1,107200 × 10⁸¹ | 1,141 × 10⁻¹⁵ |
 
-O primeiro tamanho em que o `double` já não devolve o valor exato é **22**.
+O último tamanho em que **todo termo** cabe em `2⁵³` é **17**, e até lá a soma é
+exata em qualquer versão. Depois disso não há regra: no 3.13 o primeiro erro
+aparece em 22 casais e no 3.11 em 19, e há tamanhos acima de 22 em que a soma
+volta a fechar exata por acaso. Por isso o teste prende o limite de `2⁵³`, e não
+o primeiro erro.
 
 ### A fatia de arranjos que sobra
 
@@ -126,6 +133,12 @@ alvo — as duas coisas estão em teste.
   Custa quinze dígitos depois da vírgula: o erro relativo em sessenta casais é
   1,1 × 10⁻¹⁵. A frase estava num comentário, que é onde um exagero não quebra
   teste nenhum — e por isso o comentário foi corrigido junto com a medida.
+- **Prendi em teste o primeiro tamanho em que o `double` erra, e o CI derrubou.**
+  Medi 22 no Python 3.13 e escrevi 22. O 3.11 erra em 19, nos três sistemas, e a
+  bateria quebrou na primeira execução depois da publicação. O número era real,
+  mas era uma propriedade da **implementação**, não do problema. O teste agora
+  prende o que é do problema — todo termo caber em `2⁵³` — e o README diz os dois
+  limiares com o nome da versão ao lado.
 - **Esperava que a enumeração chegasse a onze ou doze casais sem apuro.** Onze
   já são 39.916.800 permutações e pedem `--completo`; doze são 479 milhões, e a
   tabela do README diz "não terminou" em vez de copiar o valor que a fórmula
@@ -139,7 +152,7 @@ menage/enumeracao.py   o primeiro caminho: todas as n! permutações, uma a uma
 menage/mascaras.py     o segundo caminho: tabela sobre o conjunto de já sentados
 menage/touchard.py     o terceiro e o quarto: a fórmula de 1934 e a recorrência
 ferramentas/medidor.py roda tudo e imprime as tabelas acima
-testes/                37 testes
+testes/                39 testes
 ```
 
 ## Rodar

@@ -50,22 +50,43 @@ class TestCancelamento(unittest.TestCase):
         self.assertEqual(len(str(touchard.maior_termo(60))), 83)
         self.assertEqual(len(str(touchard.contar(60))), 82)
 
-    def test_o_double_erra_a_partir_de_vinte_e_dois(self):
-        for n in range(3, 22):
+    def test_enquanto_os_termos_cabem_em_2_53_a_soma_e_exata(self):
+        # este e o limite que NAO depende da versao do Python: enquanto todo
+        # termo cabe num double sem perder digito, a soma fecha exata
+        for n in range(3, 41):
+            if touchard.maior_termo(n) >= 2 ** 53:
+                continue
             certo = touchard.contar(n)
             em_float = sum(float(t) for t in touchard.termos(n))
             self.assertEqual(em_float, float(certo), "n=%d devia bater" % n)
-        certo = touchard.contar(22)
-        em_float = sum(float(t) for t in touchard.termos(22))
-        self.assertNotEqual(em_float, float(certo))
 
-    def test_o_erro_do_double_e_pequeno_mas_existe(self):
-        for n, teto in ((30, 3e-15), (60, 2e-15)):
+    def test_o_ultimo_tamanho_que_cabe_e_dezessete(self):
+        self.assertLess(touchard.maior_termo(17), 2 ** 53)
+        self.assertGreater(touchard.maior_termo(18), 2 ** 53)
+
+    def test_passando_disso_a_exatidao_vira_sorte(self):
+        # de 18 em diante o double as vezes acerta e as vezes nao, e QUANDO ele
+        # erra depende da versao do Python: 3.13 so erra a partir de 22, e 3.11
+        # ja erra em 19. Prender o primeiro erro seria prender a implementacao
+        erram = [
+            n
+            for n in range(18, 41)
+            if sum(float(t) for t in touchard.termos(n)) != float(touchard.contar(n))
+        ]
+        self.assertTrue(erram)
+        self.assertGreater(len(erram), 10)
+
+    def test_quando_o_double_erra_o_erro_e_minusculo(self):
+        # nao importa QUAIS n erram nesta versao: quando erram, erram pouco
+        houve = 0
+        for n in range(18, 61):
             certo = touchard.contar(n)
             em_float = sum(float(t) for t in touchard.termos(n))
-            erro = abs(em_float - certo) / certo
-            self.assertGreater(erro, 0)
-            self.assertLess(erro, teto)
+            if em_float == float(certo):
+                continue
+            houve += 1
+            self.assertLess(abs(em_float - certo) / certo, 1e-14, "n=%d" % n)
+        self.assertGreater(houve, 10)
 
 
 class TestRazao(unittest.TestCase):

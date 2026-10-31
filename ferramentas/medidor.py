@@ -80,13 +80,19 @@ def main():
             primeiro_erro = n
     print("| casais | inteiro | double | erro relativo |")
     print("|---|---|---|---|")
-    for n in (15, 20, 30, 60):
+    for n in (15, 17, 30, 60):
         certo = touchard.contar(n)
         em_float = sum(float(t) for t in touchard.termos(n))
         erro = abs(em_float - certo) / certo
         print("| %d | %s | %.6e | %.3e |" % (n, milhar(certo), em_float, erro))
     print()
-    print("o primeiro n em que o double ja nao devolve o valor exato: %d" % primeiro_erro)
+    print("ultimo tamanho em que todo termo cabe em 2^53: %d"
+          % max(n for n in range(3, ATE_FORMULA + 1) if touchard.maior_termo(n) < 2 ** 53))
+    print("primeiro n em que o double erra NESTA versao do Python (%s): %d"
+          % (sys.version.split()[0], primeiro_erro))
+    print("quantos n de 18 a %d erram nesta versao: %d"
+          % (ATE_FORMULA, sum(1 for n in range(18, ATE_FORMULA + 1)
+                              if sum(float(t) for t in touchard.termos(n)) != float(touchard.contar(n)))))
 
     print("\n## A fatia de arranjos que sobra\n")
     alvo = exp(-2)
